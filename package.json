@@ -1,0 +1,16 @@
+{
+  "name": "hypixel-api",
+  "version": "1.0.0",
+  "description": "Auction and Bazzar Flipping Galore",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "commonjs",
+  "author": "Towster",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^13.6.0",
+    "node-fetch": "^2.6.7"
+  }
+}
