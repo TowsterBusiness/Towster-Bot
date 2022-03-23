@@ -4,5 +4,8 @@
     "STICK": 0.625,
     "SPECKLED_MELON": 8,
     "MILK_BUCKET": 0,
-    "GOLDEN_CARROT": 8.3
+    "GOLDEN_CARROT": 8.3,
+    "PAPER": 5,
+    "SUGAR": 5,
+    "BLAZE_POWDER": 12
 }

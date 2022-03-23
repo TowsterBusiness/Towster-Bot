@@ -2,96 +2,6 @@ const fs = require('fs');
 const { getUnpackedSettings } = require('http2');
 const fetch = require('node-fetch');
 
-// // Require the necessary discord.js classes
-// const discord = require('discord.js');
-// const config = require('./config.json');
-
-// // Create a new client instance
-// const client = new discord.Client({ intents: [discord.Intents.FLAGS.GUILDS] });
-
-// // When the client is ready, run this code (only once)
-// client.once('ready', () => {
-// 	console.log('Ready!');
-// });
-
-// // Login to Discord with your client's token
-// client.login(config.token);
-
-const readFile = function(path) {
-    let apiData = fs.readFileSync(path, "utf-8", (err, data) => {
-        if (err) { console.log(err) }
-        apiData = data;
-    })
-    return JSON.parse(apiData)
-}
-
-const bazzarSellOffer = function(object) {
-    return apiData.products[object].buy_summary[0].pricePerUnit
-    
-}
-
-const bazzarBuyOffer = function(object) {
-    return apiData.products[object].sell_summary[0].pricePerUnit
-}
-
-const instaSell = function(object) {
-    return bazzarBuyOffer() * 1.125
-}
-
-const instaBuy = function(object) {
-    return bazzarSellOffer() * 1.125
-}
-
-const calculateFlip = async function(flipItem) {
-    const itemData = readFile(`./NEU-REPO/items/${flipItem}.json`)
-    const unidefinedItemList = readFile('./bazzar_Item_List.json')
-    let buyPrice = 0;
-    let slotNames = [
-        'A1',
-        'A2',
-        'A3',
-        'B1',
-        'B2',
-        'B3',
-        'C1',
-        'C2',
-        'C3',
-    ]
-
-    for (slot in slotNames) {
-        
-        if (itemData.recipe == null) return 'Not Craftable'
-
-        let item = itemData.recipe[slotNames[slot]].split(':')
-
-            
-        if (itemData.recipe[slotNames[slot]] != '')          
-        {
-            for (wierdName in weirdNamings2) {
-                if (item[0] == weirdNamings2[wierdName][1])
-                    item[0] = weirdNamings2[wierdName][0]
-            }
-            try {
-                buyPrice += bazzarBuyOffer(item[0]) * item[1]
-            } catch {
-                if (unidefinedItemList[item[0]] != null) 
-                    buyPrice += unidefinedItemList[item[0]]
-                else
-                    console.log('Cannot Craft: ' + flipItem + ' ' + item[0])
-            }
-        }
-
-    }
-    return apiData.products[flipItem].buy_summary[0].pricePerUnit - buyPrice
-}
-
-const fetchBazzarAPI = async function() {
-    const apiData = await fetch('https://api.hypixel.net/skyblock/bazaar')
-        .then(data => data.json())
-        .then(data => {return data});
-    return apiData
-}
-
 const API_KEY = "8eaabdfe-c4ae-4566-bea2-34376adb8aa5";
 const playerName = "Towster_"
 const playerUUID = "20c0adea-5d08-4ce9-9cbb-5e3e88ebd7dd"
@@ -126,6 +36,124 @@ let weirdNamings2 = [
     ['LOG:3', 'LOG-3'],
 ]
 
+const readFile = function(path) {
+    let apiData = fs.readFileSync(path, "utf-8", (err, data) => {
+        if (err) { console.log(err) }
+        apiData = data;
+    })
+    return JSON.parse(apiData)
+}
+
+const bazzarSellOffer = function(object) {
+    return apiData.products[object].buy_summary[0].pricePerUnit
+    
+}
+
+const bazzarBuyOffer = function(object) {
+    return apiData.products[object].sell_summary[0].pricePerUnit
+}
+
+const bazzarBuyAnount = function(object) {
+    return apiData.products[object].quick_status.buyVolume
+}
+
+const bazzarSellAmount = function(object) {
+    return apiData.products[object].quick_status.sellVolume
+}
+
+const calculateCraft = async function(craftItem) {
+    const itemData = readFile(`./NEU-REPO/items/${craftItem}.json`)
+    const unidefinedItemList = readFile('./bazzar_Item_List.json')
+    let slotNames = [
+        'A1',
+        'A2',
+        'A3',
+        'B1',
+        'B2',
+        'B3',
+        'C1',
+        'C2',
+        'C3',
+    ]
+    let craft = [];
+
+    for (slot in slotNames) {
+        if (itemData.recipe == null) return
+        let item = itemData.recipe[slotNames[slot]].split(':')
+        for (wierdName in weirdNamings2) {
+            if (item[0] == weirdNamings2[wierdName][1])
+                item[0] = weirdNamings2[wierdName][0]
+        }
+        let alreadyInCraft = false
+        for (index in craft) {
+            if (craft[index][0] == item[0]) {
+                craft[index][1] += parseInt(item[1])
+                alreadyInCraft = true;
+            }
+        }
+        if (!alreadyInCraft && item[0] != '') {
+            try {
+                craft.push([item[0], parseInt(item[1]), bazzarSellAmount(item[0])])
+            } catch {
+                craft.push([item[0], parseInt(item[1]), 'Not Bazzar Buyable'])
+            }
+        }
+    }
+    return craft
+}
+
+const calculateFlip = async function(flipItem) {
+    const itemData = readFile(`./NEU-REPO/items/${flipItem}.json`)
+    const unidefinedItemList = readFile('./bazzar_Item_List.json')
+    let buyPrice = 0;
+    let slotNames = [
+        'A1',
+        'A2',
+        'A3',
+        'B1',
+        'B2',
+        'B3',
+        'C1',
+        'C2',
+        'C3',
+    ]
+
+    for (slot in slotNames) {
+        
+        if (itemData.recipe == null) return 'Not Craftable'
+
+        let item = itemData.recipe[slotNames[slot]].split(':')
+
+            
+        if (itemData.recipe[slotNames[slot]] != '')          
+        {
+            for (wierdName in weirdNamings2) {
+                if (item[0] == weirdNamings2[wierdName][1])
+                    item[0] = weirdNamings2[wierdName][0]
+            }
+            try {
+                buyPrice += bazzarBuyOffer(item[0]) * item[1]
+            } catch {
+                if (unidefinedItemList[item[0]] != null) {
+                    buyPrice += unidefinedItemList[item[0]]
+                } else {
+                    console.log('Cannot Craft: ' + flipItem + ' ' + item[0])
+                    return 'Cannot Craft: ' + flipItem + ' ' + item[0]
+                }
+            }
+        }
+
+    }
+    return apiData.products[flipItem].buy_summary[0].pricePerUnit - buyPrice
+}
+
+const fetchBazzarAPI = async function() {
+    const apiData = await fetch('https://api.hypixel.net/skyblock/bazaar')
+        .then(data => data.json())
+        .then(data => {return data});
+    return apiData
+}
+
 const main = async function() {
     apiData = await fetchBazzarAPI();
 
@@ -136,11 +164,24 @@ const main = async function() {
                 value = weirdNamings[wierdName][1]
         }
         let flipValue = await calculateFlip(value)
-        if (flipValue != 'Not Craftable') bazzarItemList.push([value, flipValue])
+        if (flipValue != 'Not Craftable' && flipValue > 0) {
+            let craft = await calculateCraft(value);
+            let highestTimeToBuy = 0;
+            for (item in craft) {
+                if (highestTimeToBuy < craft[item][2]/craft[item][1]) {
+                    highestTimeToBuy = craft[item][2]/craft[item][1]
+                }
+            }
+            bazzarItemList.push([Math.floor(flipValue), bazzarBuyAnount(value), value, Math.floor(highestTimeToBuy)])
+        }
+            
     }
-
-    console.log(bazzarItemList)
-    
+    bazzarItemList.sort(function(a, b) {
+        return a[0] - b[0];
+    });
+    for (index in bazzarItemList) {
+        console.log(bazzarItemList[index])
+    }
 
     console.log('Titanic: ' + (await calculateFlip('TITANIC_EXP_BOTTLE')))
     console.log('Grand: ' + (bazzarSellOffer('GRAND_EXP_BOTTLE') - bazzarBuyOffer('ENCHANTED_LAPIS_LAZULI') * 6))
