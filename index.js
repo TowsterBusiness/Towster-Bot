@@ -2,6 +2,19 @@ const fs = require('fs');
 const { getUnpackedSettings } = require('http2');
 const fetch = require('node-fetch');
 
+// const { Client, Intents } = require('discord.js');
+// const { token } = require('./config.json');
+
+// const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+
+// client.once('ready', () => {
+// 	console.log('Ready!');
+// });
+
+// // Login to Discord with your client's token
+// client.login(token);
+
+
 const API_KEY = "8eaabdfe-c4ae-4566-bea2-34376adb8aa5";
 const playerName = "Towster_"
 const playerUUID = "20c0adea-5d08-4ce9-9cbb-5e3e88ebd7dd"
@@ -164,6 +177,7 @@ const main = async function() {
                 value = weirdNamings[wierdName][1]
         }
         let flipValue = await calculateFlip(value)
+
         let craft = await calculateCraft(value);
         let highestTimeToBuy = 0;
         for (item in craft) {
@@ -174,6 +188,16 @@ const main = async function() {
         if (flipValue != 'Not Craftable' && flipValue > 1000 && highestTimeToBuy > 1000) {
             
             bazzarItemList.push([Math.floor(flipValue), bazzarBuyAnount(value), value, Math.floor(highestTimeToBuy)])
+
+        if (flipValue != 'Not Craftable' && flipValue > 0 && bazzarBuyAnount(value) > 2000) {
+            let craft = await calculateCraft(value);
+            let highestTimeToBuy = 0;
+            for (item in craft) {
+                if (highestTimeToBuy < craft[item][2]/craft[item][1]) {
+                    highestTimeToBuy = craft[item][2]/craft[item][1]
+                }
+            }
+            bazzarItemList.push([Math.floor(flipValue * highestTimeToBuy), bazzarBuyAnount(value), value, Math.floor(flipValue)])
         }
             
     }
@@ -183,10 +207,6 @@ const main = async function() {
     for (index in bazzarItemList) {
         console.log(bazzarItemList[index])
     }
-
-    console.log('Titanic: ' + (await calculateFlip('TITANIC_EXP_BOTTLE')))
-    console.log('Grand: ' + (bazzarSellOffer('GRAND_EXP_BOTTLE') - bazzarBuyOffer('ENCHANTED_LAPIS_LAZULI') * 6))
-    console.log('Tara Silk: ' + (bazzarSellOffer('TARANTULA_SILK') - ((bazzarBuyOffer('TARANTULA_WEB') * 128) + (bazzarBuyOffer('ENCHANTED_FLINT') * 32))));
 }
 
 main();
