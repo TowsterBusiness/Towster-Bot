@@ -164,14 +164,15 @@ const main = async function() {
                 value = weirdNamings[wierdName][1]
         }
         let flipValue = await calculateFlip(value)
-        if (flipValue != 'Not Craftable' && flipValue > 0) {
-            let craft = await calculateCraft(value);
-            let highestTimeToBuy = 0;
-            for (item in craft) {
-                if (highestTimeToBuy < craft[item][2]/craft[item][1]) {
-                    highestTimeToBuy = craft[item][2]/craft[item][1]
-                }
+        let craft = await calculateCraft(value);
+        let highestTimeToBuy = 0;
+        for (item in craft) {
+            if (highestTimeToBuy < craft[item][2]/craft[item][1]) {
+                highestTimeToBuy = craft[item][2]/craft[item][1]
             }
+        }
+        if (flipValue != 'Not Craftable' && flipValue > 1000 && highestTimeToBuy > 1000) {
+            
             bazzarItemList.push([Math.floor(flipValue), bazzarBuyAnount(value), value, Math.floor(highestTimeToBuy)])
         }
             
