@@ -185,9 +185,6 @@ const main = async function() {
                 highestTimeToBuy = craft[item][2]/craft[item][1]
             }
         }
-        if (flipValue != 'Not Craftable' && flipValue > 1000 && highestTimeToBuy > 1000) {
-            
-            bazzarItemList.push([Math.floor(flipValue), bazzarBuyAnount(value), value, Math.floor(highestTimeToBuy)])
 
         if (flipValue != 'Not Craftable' && flipValue > 0 && bazzarBuyAnount(value) > 2000) {
             let craft = await calculateCraft(value);
