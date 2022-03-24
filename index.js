@@ -171,6 +171,15 @@ const main = async function() {
                 value = Utils.weirdNamings[wierdName][1]
         }
         let flipValue = await calculateFlip(value)
+
+        let craft = await calculateCraft(value);
+        let highestTimeToBuy = 0;
+        for (item in craft) {
+            if (highestTimeToBuy < craft[item][2]/craft[item][1]) {
+                highestTimeToBuy = craft[item][2]/craft[item][1]
+            }
+        }
+
         if (flipValue != 'Not Craftable' && flipValue > 0 && Utils.bazzarBuyAnount(value) > 2000) {
             let craft = await calculateCraft(value);
             let highestTimeToBuy = 0;
