@@ -2,17 +2,38 @@ const fs = require('fs');
 const { getUnpackedSettings } = require('http2');
 const fetch = require('node-fetch');
 
-// const { Client, Intents } = require('discord.js');
-// const { token } = require('./config.json');
+const { Client, Intents, MessageEmbed } = require('discord.js');
+const { token } = require('./config.json');
 
-// const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
-// client.once('ready', () => {
-// 	console.log('Ready!');
-// });
 
-// // Login to Discord with your client's token
-// client.login(token);
+
+
+
+client.once('ready', () => {
+	console.log('Ready!');
+});
+
+client.on('interactionCreate', async interaction => {
+	if (!interaction.isCommand()) return;
+
+	const { commandName } = interaction;
+
+	if (commandName === 'ping') {
+		await interaction.reply('Pong!');
+	} else if (commandName === 'server') {
+		await interaction.reply(`Server name: ${interaction.guild.name}\nTotal members: ${interaction.guild.memberCount}`);
+	} else if (commandName === 'user') {
+		await interaction.reply(`Your tag: ${interaction.user.tag}\nYour id: ${interaction.user.id}`);
+	} else if (commandName === 'bazzar') {
+        await bazzar(interaction);
+        
+    }
+});
+
+// Login to Discord with your client's token
+client.login(token);
 
 
 const API_KEY = "8eaabdfe-c4ae-4566-bea2-34376adb8aa5";
@@ -161,10 +182,10 @@ const calculateFlip = async function(flipItem) {
     return apiData.products[flipItem].buy_summary[0].pricePerUnit - buyPrice
 }
 
-const main = async function() {
+const bazzar = async function(interaction) {
+    let bazzarItemList = []
+    
     apiData = await Utils.fetchBazzarAPI();
-
-    let bazzarItemList = [];
     for (value in apiData.products) {
         for (wierdName in Utils.weirdNamings) {
             if (value == Utils.weirdNamings[wierdName][0])
@@ -180,7 +201,7 @@ const main = async function() {
             }
         }
 
-        if (flipValue != 'Not Craftable' && flipValue > 0 && Utils.bazzarBuyAnount(value) > 2000) {
+        if (flipValue != 'Not Craftable' && flipValue > 1000 && Utils.bazzarBuyAnount(value) > 2000) {
             let craft = await calculateCraft(value);
             let highestTimeToBuy = 0;
             for (item in craft) {
@@ -195,9 +216,16 @@ const main = async function() {
     bazzarItemList.sort(function(a, b) {
         return a[0] - b[0];
     });
-    for (index in bazzarItemList) {
-        console.log(bazzarItemList[index])
+    let bazzarItemObject = []
+    for (let index = 0; index < 25; index ++) {
+        bazzarItemObject.push({name: bazzarItemList[bazzarItemList.length + index - 25][2].toString(), value: 'Margin: ' + bazzarItemList[bazzarItemList.length + index - 25][3].toString()})
     }
+    console.log(bazzarItemList)
+    const bazzarEmbed = new MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle('What you Should buy:')
+        .addFields(bazzarItemObject)
+        .setTimestamp()
+        .setFooter({ text: 'Courtesy of Towster'});
+    await interaction.channel.send({ embeds: [bazzarEmbed] });
 }
-
-main();
