@@ -68,6 +68,10 @@ const Utils = {
             .then(data => {return data});
         return apiData
     },
+    setCharAt: function(str,index,chr) {
+        if(index > str.length-1) return str;
+        return str.substring(0,index) + chr + str.substring(index+1);
+    },
     weirdNamings: [
         ['INK_SACK:3', 'INK_SACK'],
         ['INK_SACK:4', 'ENCHANTED_INK_SACK'],
@@ -218,11 +222,10 @@ const bazzar = async function(interaction) {
     });
     let bazzarItemObject = []
     for (let index = 0; index < 25; index ++) {
-        bazzarItemObject.push({name: bazzarItemList[bazzarItemList.length + index - 25][2].toString(), value: 'Margin: ' + bazzarItemList[bazzarItemList.length + index - 25][3].toString()})
+        bazzarItemObject.push({name: bazzarItemList[bazzarItemList.length + index - 25][2].toString().replaceAll('_', ' '), value: 'Margin: ' + bazzarItemList[bazzarItemList.length + index - 25][3].toString()})
     }
-    console.log(bazzarItemList)
     const bazzarEmbed = new MessageEmbed()
-        .setColor('#0099ff')
+        .setColor('#ffcceb')
         .setTitle('What you Should buy:')
         .addFields(bazzarItemObject)
         .setTimestamp()
