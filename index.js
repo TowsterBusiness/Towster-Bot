@@ -7,11 +7,6 @@ const { token } = require('./config.json');
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
-let pingServer = async function (interaction) {
-
-
-}
-
 client.once('ready', () => {
 	console.log('Ready!');
 });
@@ -24,20 +19,18 @@ client.on('interactionCreate', async interaction => {
 	if (commandName === 'ping') {
 		await interaction.reply('Pong!');
 	} else if (commandName === 'server') {
-		setInterval(async () => {
-            console.log('pinged');
-            const apiPingData = await fetch('https://api.mcsrvstat.us/2/dev.legitimoose.com')
-                .then(data => data.json())
-                .then(data => {return data});
-            if (apiPingData.debug.ping) {
-                const apiEmbed = new MessageEmbed()
-                    .setColor('#ffcceb')
-                    .setTitle('Ligitimoose is ONLINE:')
-                    .setTimestamp()
-                    .setFooter({ text: 'Courtesy of Towster'});
-                await interaction.channel.send({ embeds: [apiEmbed] });
-            }
-        }, 10000);
+		console.log('pinged');
+        const apiPingData = await fetch('https://api.mcsrvstat.us/2/dev.legitimoose.com')
+            .then(data => data.json())
+            .then(data => {return data});
+        if (apiPingData.debug.ping) {
+            const apiEmbed = new MessageEmbed()
+                .setColor('#ffcceb')
+                .setTitle('Ligitimoose is ONLINE:')
+                .setTimestamp()
+                .setFooter({ text: 'Courtesy of Towster'});
+            await interaction.channel.send({ embeds: [apiEmbed] });
+        }
 	} else if (commandName === 'user') {
 		await interaction.reply(`Your tag: ${interaction.user.tag}\nYour id: ${interaction.user.id}`);
 	} else if (commandName === 'bazzar') {
