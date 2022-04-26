@@ -5,13 +5,17 @@ const fetch = require('node-fetch');
 const { Client, Intents, MessageEmbed } = require('discord.js');
 const { token } = require('./config.json');
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+
+let moai = false;
 
 client.once('ready', () => {
 	console.log('Ready!');
 });
 
 client.on('interactionCreate', async interaction => {
+    if (interaction.isMessageComponent()) console.log('You Typed');
+
 	if (!interaction.isCommand()) return;
 
 	const { commandName } = interaction;
@@ -30,18 +34,31 @@ client.on('interactionCreate', async interaction => {
                 .setTimestamp()
                 .setFooter({ text: 'Courtesy of Towster'});
             await interaction.channel.send({ embeds: [apiEmbed] });
+        } else {
+            const apiEmbed = new MessageEmbed()
+                .setColor('#ffcceb')
+                .setTitle('Ligitimoose is NOT ONLINE:')
+                .setTimestamp()
+                .setFooter({ text: 'Courtesy of Towster'});
+            await interaction.channel.send({ embeds: [apiEmbed] });
         }
 	} else if (commandName === 'user') {
 		await interaction.reply(`Your tag: ${interaction.user.tag}\nYour id: ${interaction.user.id}`);
 	} else if (commandName === 'bazzar') {
         await bazzar(interaction);
-        
+    } else if (commandName === 'moai') {
+        interaction.channel.send('🗿🗿 Moyai Setting tured on 🗿🗿')
+        moai = true;
     }
 });
 
+client.on('messageCreate', message => {
+    if (moai)
+        message.react('🗿')
+})
+
 // Login to Discord with your client's token
 client.login(token);
-
 
 const API_KEY = "8eaabdfe-c4ae-4566-bea2-34376adb8aa5";
 const playerName = "Towster_"
@@ -108,7 +125,12 @@ const Utils = {
 }
 
 const calculateCraft = async function(craftItem) {
-    const itemData = Utils.readFile(`./NEU-REPO/items/${craftItem}.json`)
+    let itemData
+    try {
+        itemData = Utils.readFile(`./NEU-REPO/items/${flipItem}.json`)
+    } catch {
+        return 'Not Craftable'
+    }
     const unidefinedItemList = Utils.readFile('./bazzar_Item_List.json')
     let slotNames = [
         'A1',
@@ -149,7 +171,12 @@ const calculateCraft = async function(craftItem) {
 }
 
 const calculateFlip = async function(flipItem) {
-    const itemData = Utils.readFile(`./NEU-REPO/items/${flipItem}.json`)
+    let itemData
+    try {
+        itemData = Utils.readFile(`./NEU-REPO/items/${flipItem}.json`)
+    } catch {
+        return 'Not Craftable'
+    }
     const unidefinedItemList = Utils.readFile('./bazzar_Item_List.json')
     let buyPrice = 0;
     let slotNames = [
@@ -228,6 +255,7 @@ const bazzar = async function(interaction) {
         return a[0] - b[0];
     });
     let bazzarItemObject = []
+    console.log(bazzarItemList)
     for (let index = 0; index < 25; index ++) {
         bazzarItemObject.push({name: bazzarItemList[bazzarItemList.length + index - 25][2].toString().replaceAll('_', ' '), value: 'Margin: ' + bazzarItemList[bazzarItemList.length + index - 25][3].toString()})
     }
@@ -238,4 +266,6 @@ const bazzar = async function(interaction) {
         .setTimestamp()
         .setFooter({ text: 'Courtesy of Towster'});
     await interaction.channel.send({ embeds: [bazzarEmbed] });
+
+    return true;
 }

@@ -8,6 +8,7 @@ const commands = [
 	new SlashCommandBuilder().setName('server').setDescription('Replies with server info!'),
 	new SlashCommandBuilder().setName('user').setDescription('Replies with user info!'),
     new SlashCommandBuilder().setName('bazzar').setDescription('Gives info about what you should buy and sell'),
+	new SlashCommandBuilder().setName('moai').setDescription('MOAI'),
 ]
 	.map(command => command.toJSON());
 
