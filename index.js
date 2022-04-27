@@ -48,7 +48,11 @@ client.on('interactionCreate', async interaction => {
         await bazzar(interaction);
     } else if (commandName === 'moai') {
         interaction.channel.send('🗿🗿 Moyai Setting tured on 🗿🗿')
-        moai = true;
+        if (moai) {
+            moai = false;
+        } else {
+            moai = true;
+        }
     }
 });
 
