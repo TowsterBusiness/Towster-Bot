@@ -62,7 +62,7 @@ client.on('messageCreate', message => {
 })
 
 // Login to Discord with your client's token
-client.login(token);
+client.login(token+'mWk');
 
 const API_KEY = "8eaabdfe-c4ae-4566-bea2-34376adb8aa5";
 const playerName = "Towster_"
@@ -73,7 +73,10 @@ let apiData
 const Utils = {
     readFile: function(path) {
         let apiData = fs.readFileSync(path, "utf-8", (err, data) => {
-            if (err) { console.log(err) }
+            if (err) { 
+                console.log(err)
+                return 0;
+            }
             apiData = data;
         })
         return JSON.parse(apiData)
@@ -100,6 +103,7 @@ const Utils = {
         if(index > str.length-1) return str;
         return str.substring(0,index) + chr + str.substring(index+1);
     },
+    //From json to bazzar
     weirdNamings: [
         ['INK_SACK:3', 'INK_SACK'],
         ['INK_SACK:4', 'ENCHANTED_INK_SACK'],
@@ -113,6 +117,7 @@ const Utils = {
         ['LOG_2:1', 'LOG_2-1'],
         ['LOG:3', 'LOG-3'],
     ],
+    //From bazzar to json
     weirdNamings2: [
         ['INK_SACK', 'INK_SACK-3'],
         ['ENCHANTED_INK_SACK', 'INK_SACK-4'],
@@ -128,14 +133,12 @@ const Utils = {
     ]
 }
 
+//Outputs the items needded for crafting in format [Item Name], [Item Amount], [Individual Sell Price || Not bazzar Buyable], [Individual Sell Speed/Amount sold per refresh || Not bazzar Buyable]. If there is not a valid json, it will output Not Craftable.  
 const calculateCraft = async function(craftItem) {
-    let itemData
-    try {
-        itemData = Utils.readFile(`./NEU-REPO/items/${flipItem}.json`)
-    } catch {
+    let itemData = Utils.readFile(`./NEU-REPO/items/${craftItem}.json`)
+    if (itemdata == 0) {
         return 'Not Craftable'
     }
-    const unidefinedItemList = Utils.readFile('./bazzar_Item_List.json')
     let slotNames = [
         'A1',
         'A2',
@@ -165,9 +168,9 @@ const calculateCraft = async function(craftItem) {
         }
         if (!alreadyInCraft && item[0] != '') {
             try {
-                craft.push([item[0], parseInt(item[1]), Utils.bazzarSellAmount(item[0])])
+                craft.push([item[0], parseInt(item[1]), Utils.bazzarBuyOffer(item[0]), Utils.bazzarSellAmount(item[0])])
             } catch {
-                craft.push([item[0], parseInt(item[1]), 'Not Bazzar Buyable'])
+                craft.push([item[0], parseInt(item[1]), 'Not Bazzar Buyable', 'Not Bazzar Buyable'])
             }
         }
     }
@@ -175,53 +178,17 @@ const calculateCraft = async function(craftItem) {
 }
 
 const calculateFlip = async function(flipItem) {
-    let itemData
-    try {
-        itemData = Utils.readFile(`./NEU-REPO/items/${flipItem}.json`)
-    } catch {
-        return 'Not Craftable'
-    }
-    const unidefinedItemList = Utils.readFile('./bazzar_Item_List.json')
     let buyPrice = 0;
-    let slotNames = [
-        'A1',
-        'A2',
-        'A3',
-        'B1',
-        'B2',
-        'B3',
-        'C1',
-        'C2',
-        'C3',
-    ]
+    let craft = calculateCraft(flipItem)
 
-    for (slot in slotNames) {
+    for (slot in craft) {
         
-        if (itemData.recipe == null) return 'Not Craftable'
+        if (itemData.recipe == 'Not Craftable') return 'Not Craftable'
 
-        let item = itemData.recipe[slotNames[slot]].split(':')
-
-            
-        if (itemData.recipe[slotNames[slot]] != '')          
-        {
-            for (wierdName in Utils.weirdNamings2) {
-                if (item[0] == Utils.weirdNamings2[wierdName][1])
-                    item[0] = Utils.weirdNamings2[wierdName][0]
-            }
-            try {
-                buyPrice += Utils.bazzarBuyOffer(item[0]) * item[1]
-            } catch {
-                if (unidefinedItemList[item[0]] != null) {
-                    buyPrice += unidefinedItemList[item[0]]
-                } else {
-                    console.log('Cannot Craft: ' + flipItem + ' ' + item[0])
-                    return 'Cannot Craft: ' + flipItem + ' ' + item[0]
-                }
-            }
-        }
-
+        if (slot[2] != 'Not Bazzar Buyable')
+            buyPrice += slot[1] * slot[2]
     }
-    return apiData.products[flipItem].buy_summary[0].pricePerUnit - buyPrice
+    return Utils.bazzarSellOffer(flipitem) - buyPrice
 }
 
 const bazzar = async function(interaction) {
@@ -236,6 +203,7 @@ const bazzar = async function(interaction) {
         let flipValue = await calculateFlip(value)
 
         let craft = await calculateCraft(value);
+        console.log(craft)
         let highestTimeToBuy = 0;
         for (item in craft) {
             if (highestTimeToBuy < craft[item][2]/craft[item][1]) {
@@ -244,13 +212,6 @@ const bazzar = async function(interaction) {
         }
 
         if (flipValue != 'Not Craftable' && flipValue > 1000 && Utils.bazzarBuyAnount(value) > 2000) {
-            let craft = await calculateCraft(value);
-            let highestTimeToBuy = 0;
-            for (item in craft) {
-                if (highestTimeToBuy < craft[item][2]/craft[item][1]) {
-                    highestTimeToBuy = craft[item][2]/craft[item][1]
-                }
-            }
             bazzarItemList.push([Math.floor(flipValue * highestTimeToBuy), Utils.bazzarBuyAnount(value), value, Math.floor(flipValue)])
         }
             
